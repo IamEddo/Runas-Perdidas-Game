@@ -1,0 +1,211 @@
+{
+    "player": {
+        "class": "Mago",
+        "x": 10,
+        "y": 10,
+        "level": 1,
+        "exp": 0,
+        "gold": 50,
+        "hp": 80,
+        "mana": 100,
+        "skill_points": 0,
+        "inventory": [
+            {
+                "name": "Cajado Simples",
+                "type": "weapon",
+                "slot": "weapon",
+                "power": 4,
+                "defense": 0,
+                "damage_type": "physical",
+                "price": 15
+            },
+            {
+                "name": "Po\u00e7\u00e3o de Mana",
+                "type": "consumable",
+                "slot": null,
+                "power": 0,
+                "defense": 0,
+                "damage_type": null,
+                "price": 15
+            }
+        ],
+        "spells": [
+            "Cura Menor"
+        ],
+        "equipped_weapon": {
+            "name": "Cajado Simples",
+            "type": "weapon",
+            "slot": "weapon",
+            "power": 4,
+            "defense": 0,
+            "damage_type": "physical",
+            "price": 15
+        },
+        "equipped_chest": null,
+        "equipped_helmet": null,
+        "equipped_gloves": null,
+        "equipped_boots": null,
+        "quest": null
+    },
+    "enemies": [
+        {
+            "x": 15,
+            "y": 20,
+            "level": 2,
+            "is_boss": false
+        },
+        {
+            "x": 47,
+            "y": 21,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 29,
+            "y": 43,
+            "level": 2,
+            "is_boss": false
+        },
+        {
+            "x": 29,
+            "y": 2,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 8,
+            "y": 21,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 47,
+            "y": 27,
+            "level": 2,
+            "is_boss": false
+        },
+        {
+            "x": 48,
+            "y": 12,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 45,
+            "y": 15,
+            "level": 1,
+            "is_boss": false
+        },
+        {
+            "x": 42,
+            "y": 46,
+            "level": 1,
+            "is_boss": false
+        },
+        {
+            "x": 45,
+            "y": 5,
+            "level": 1,
+            "is_boss": false
+        },
+        {
+            "x": 5,
+            "y": 42,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 7,
+            "y": 35,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 16,
+            "y": 32,
+            "level": 1,
+            "is_boss": false
+        },
+        {
+            "x": 48,
+            "y": 10,
+            "level": 2,
+            "is_boss": false
+        },
+        {
+            "x": 24,
+            "y": 39,
+            "level": 1,
+            "is_boss": false
+        },
+        {
+            "x": 26,
+            "y": 19,
+            "level": 1,
+            "is_boss": false
+        },
+        {
+            "x": 45,
+            "y": 21,
+            "level": 1,
+            "is_boss": false
+        },
+        {
+            "x": 11,
+            "y": 42,
+            "level": 2,
+            "is_boss": false
+        },
+        {
+            "x": 13,
+            "y": 3,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 46,
+            "y": 8,
+            "level": 3,
+            "is_boss": false
+        }
+    ],
+    "npcs": [
+        {
+            "x": 12,
+            "y": 8,
+            "name": "Aldric",
+            "quest": {
+                "title": "Ca\u00e7ador de Ratos",
+                "description": "Cace 5 inimigos.",
+                "goal_type": "kill",
+                "goal_target": "Enemy",
+                "goal_amount": 5,
+                "reward_exp": 100,
+                "reward_gold": 50,
+                "current_amount": 0,
+                "completed": false
+            }
+        }
+    ],
+    "chests": [
+        {
+            "x": 43,
+            "y": 8,
+            "items": [],
+            "gold": 48,
+            "is_opened": false,
+            "color_closed": [
+                139,
+                69,
+                19
+            ],
+            "color_opened": [
+                90,
+                45,
+                10
+            ],
+            "font": "arial",
+                        "font_size": 16
+                    }
+                ]
+            }
