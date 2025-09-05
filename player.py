@@ -135,9 +135,9 @@ class Player:
             self.y = new_y
             tile_type = game_map.get_tile_type(self.x, self.y)
             if tile_type == SWAMP:
-                self.movement_cooldown = 10
+                self.movement_cooldown = 30
             else:
-                self.movement_cooldown = 5
+                self.movement_cooldown = 7
 
     def update(self, keys, game_map):
         if self.movement_cooldown > 0:

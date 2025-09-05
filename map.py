@@ -80,22 +80,32 @@ class GameMap:
         return -1
 
     def draw(self, screen, camera_x, camera_y):
-        for y in range(self.rows):
-            for x in range(self.cols):
-                draw_x = x * TILE_SIZE - camera_x
-                draw_y = y * TILE_SIZE - camera_y
-                tile_type = self.tiles[y][x]
+        # CORREÇÃO: Calcula os tiles visíveis na tela
+        start_col = camera_x // TILE_SIZE
+        end_col = start_col + (WIDTH // TILE_SIZE) + 2
+        start_row = camera_y // TILE_SIZE
+        end_row = start_row + (HEIGHT // TILE_SIZE) + 2
 
-                # Desenha o chão base
-                screen.blit(self.background_tile, (draw_x, draw_y))
+        # CORREÇÃO: Itera apenas sobre os tiles visíveis
+        for y in range(start_row, end_row):
+            for x in range(start_col, end_col):
+                if self.is_on_map(x, y):
+                    draw_x = x * TILE_SIZE - camera_x
+                    draw_y = y * TILE_SIZE - camera_y
+                    tile_type = self.tiles[y][x]
 
-                if tile_type == WALL: pygame.draw.rect(screen, (50, 50, 50), (draw_x, draw_y, TILE_SIZE, TILE_SIZE))
-                elif tile_type == TOWN: pygame.draw.rect(screen, (210, 180, 140), (draw_x, draw_y, TILE_SIZE, TILE_SIZE))
-                elif tile_type == SHOP: screen.blit(self.shop_tile, (draw_x, draw_y))
-                elif tile_type == LAVA: screen.blit(self.lava_tile, (draw_x, draw_y))
-                elif tile_type == SWAMP: screen.blit(self.swamp_tile, (draw_x, draw_y))
-                elif tile_type == STAIRS_DOWN: screen.blit(self.stairs_down_tile, (draw_x, draw_y))
-                elif tile_type == STAIRS_UP: screen.blit(self.stairs_up_tile, (draw_x, draw_y))
+                    # Desenha o chão base
+                    screen.blit(self.background_tile, (draw_x, draw_y))
+
+                    if tile_type == WALL: pygame.draw.rect(screen, (50, 50, 50), (draw_x, draw_y, TILE_SIZE, TILE_SIZE))
+                    elif tile_type == TOWN: pygame.draw.rect(screen, (210, 180, 140), (draw_x, draw_y, TILE_SIZE, TILE_SIZE))
+                    elif tile_type == SHOP: screen.blit(self.shop_tile, (draw_x, draw_y))
+                    elif tile_type == LAVA: screen.blit(self.lava_tile, (draw_x, draw_y))
+                    elif tile_type == SWAMP: screen.blit(self.swamp_tile, (draw_x, draw_y))
+                    elif tile_type == STAIRS_DOWN: screen.blit(self.stairs_down_tile, (draw_x, draw_y))
+                    elif tile_type == STAIRS_UP: screen.blit(self.stairs_up_tile, (draw_x, draw_y))
         
         for chest in self.chests:
-            chest.draw(screen, camera_x, camera_y)
+            # Otimização: só desenha baús que estão na tela
+            if start_col <= chest.x <= end_col and start_row <= chest.y <= end_row:
+                chest.draw(screen, camera_x, camera_y)

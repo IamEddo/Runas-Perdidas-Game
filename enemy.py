@@ -1,5 +1,5 @@
 import pygame
-from settings import TILE_SIZE, PHYSICAL, FIRE, ICE
+from settings import TILE_SIZE, PHYSICAL, FIRE, ICE, WHITE
 from status_effects import StatusEffect
 from items import Item
 import random
@@ -20,6 +20,9 @@ class Enemy:
         self.resistances = {ICE: 0.5}
         self.status_effects = []
         
+        # CORREÇÃO: Criar a fonte uma única vez
+        self.font = pygame.font.SysFont("Arial", 14)
+
         # Tabela de Loot
         self.loot_table = [Item("Pele de Lobo", "material")]
         if level >= 2: self.loot_table.append(Item("Minério de Ferro", "material"))
@@ -99,9 +102,9 @@ class Enemy:
     def draw(self, screen, camera_x, camera_y):
         rect = pygame.Rect(self.x * TILE_SIZE - camera_x, self.y * TILE_SIZE - camera_y, self.size, self.size)
         pygame.draw.rect(screen, self.color, rect)
-        font = pygame.font.SysFont("Arial", 14)
-        hp_text = font.render(f"HP: {self.hp}/{self.max_hp}", True, (255, 255, 255))
-        lvl_text = font.render(f"Lv: {self.level}", True, (255, 255, 0))
+        # CORREÇÃO: Reutilizar a fonte
+        hp_text = self.font.render(f"HP: {self.hp}/{self.max_hp}", True, WHITE)
+        lvl_text = self.font.render(f"Lv: {self.level}", True, (255, 255, 0))
         screen.blit(hp_text, (rect.x, rect.y - 20))
         screen.blit(lvl_text, (rect.x, rect.y - 35))
 

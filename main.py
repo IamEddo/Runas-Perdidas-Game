@@ -15,28 +15,41 @@ from crafting import CraftingScreen
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Reino Perdido 2.0")
+pygame.display.set_caption("Runas Perdidas")
 battle_background = pygame.image.load("assets/battle_background.png").convert()
 clock = pygame.time.Clock()
 SAVE_FILE = "savegame.json"
 
 def save_game(player, enemies, npcs, chests, current_level):
+    # Função para converter um item para um dicionário, trocando 'type_' por 'type'
+    def item_to_dict(item):
+        if not item: return None
+        item_dict = vars(item).copy()
+        if 'type_' in item_dict:
+            item_dict['type'] = item_dict.pop('type_')
+        return item_dict
+
     player_data = {
         "class": player.character_class, "x": player.x, "y": player.y, "level": player.level,
         "exp": player.exp, "gold": player.gold, "hp": player.hp, "mana": player.mana,
         "skill_points": player.skill_points,
-        "inventory": [vars(item) for item in player.inventory],
+        "inventory": [item_to_dict(item) for item in player.inventory],
         "spells": [s.name for s in player.spells],
-        "equipped_weapon": vars(player.equipped_weapon) if player.equipped_weapon else None,
-        "equipped_chest": vars(player.equipped_chest) if player.equipped_chest else None,
-        "equipped_helmet": vars(player.equipped_helmet) if player.equipped_helmet else None,
-        "equipped_gloves": vars(player.equipped_gloves) if player.equipped_gloves else None,
-        "equipped_boots": vars(player.equipped_boots) if player.equipped_boots else None,
+        "equipped_weapon": item_to_dict(player.equipped_weapon) if player.equipped_weapon else None,
+        "equipped_chest": item_to_dict(player.equipped_chest) if player.equipped_chest else None,
+        "equipped_helmet": item_to_dict(player.equipped_helmet) if player.equipped_helmet else None,
+        "equipped_gloves": item_to_dict(player.equipped_gloves) if player.equipped_gloves else None,
+        "equipped_boots": item_to_dict(player.equipped_boots) if player.equipped_boots else None,
         "quest": vars(player.quest) if player.quest else None
     }
     enemies_data = [{"x": e.x, "y": e.y, "level": e.level, "is_boss": isinstance(e, Boss)} for e in enemies]
     npcs_data = [{"x": n.x, "y": n.y, "name": n.name, "quest": vars(n.quest) if n.quest else None} for n in npcs]
-    chests_data = [vars(c) for c in chests]
+    chests_data = [
+        {
+            "x": c.x, "y": c.y, "gold": c.gold, "is_opened": c.is_opened,
+            "items": [item_to_dict(i) for i in c.items]
+        } for c in chests
+    ]
     
     save_data = {"player": player_data, "enemies": enemies_data, "npcs": npcs_data, "chests": chests_data, "current_level": current_level}
     with open(SAVE_FILE, 'w') as f:
@@ -51,19 +64,30 @@ def load_game():
     player.x, player.y, player.level, player.exp, player.gold, player.hp, player.mana, player.skill_points = \
         p_data["x"], p_data["y"], p_data["level"], p_data["exp"], p_data["gold"], p_data["hp"], p_data["mana"], p_data.get("skill_points", 0)
     
-    player.inventory = [Item(**item_data) for item_data in p_data["inventory"]]
+    player.inventory = []
+    for item_data in p_data["inventory"]:
+        if 'type' in item_data:
+            item_data['type_'] = item_data.pop('type')
+        player.inventory.append(Item(**item_data))
     
-    # Reconstruir magias
     all_spells = SKILL_LIST["Guerreiro"] + SKILL_LIST["Mago"] + SKILL_LIST["Arqueiro"]
     player.spells = [spell for spell in all_spells if spell.name in p_data.get("spells", [])]
 
-    # Re-equipar itens
     def find_and_equip(slot_name):
         item_data = p_data.get(f"equipped_{slot_name}")
         if item_data:
-            item_to_equip = next((item for item in player.inventory if vars(item) == item_data), None)
-            if item_to_equip:
-                player.equip(item_to_equip)
+            if 'type' in item_data:
+                item_data['type_'] = item_data.pop('type')
+            
+            # Precisamos comparar os dicionários normalizados
+            for item in player.inventory:
+                temp_item_dict = vars(item).copy()
+                if 'type_' in temp_item_dict:
+                    temp_item_dict['type'] = temp_item_dict.pop('type_')
+                
+                if temp_item_dict == item_data:
+                    player.equip(item)
+                    break
 
     find_and_equip("weapon")
     find_and_equip("chest")
@@ -73,7 +97,18 @@ def load_game():
 
     if p_data["quest"]: player.quest = Quest(**p_data["quest"])
 
-    chests = [TreasureChest(c['x'], c['y'], [Item(**i) for i in c['items']], c['gold']) for c in save_data.get("chests", [])]
+    chests = []
+    for c_data in save_data.get("chests", []):
+        items = []
+        for item_data in c_data.get("items", []):
+            if 'type' in item_data:
+                item_data['type_'] = item_data.pop('type')
+            items.append(Item(**item_data))
+        
+        chest = TreasureChest(c_data['x'], c_data['y'], items, c_data.get('gold', 0))
+        chest.is_opened = c_data.get('is_opened', False)
+        chests.append(chest)
+        
     current_level = save_data.get("current_level", 1)
     game_map = GameMap(current_level, chests)
 
@@ -112,7 +147,7 @@ def spawn_enemies(game_map, player, num=20):
 
 def start_menu():
     font = pygame.font.SysFont("Arial", 40)
-    title = font.render("Reino Perdido", True, WHITE)
+    title = font.render("Runas Perdidas", True, WHITE)
     new_game_rect = pygame.Rect(WIDTH/2 - 100, 250, 200, 50)
     load_game_rect = pygame.Rect(WIDTH/2 - 100, 320, 200, 50)
     while True:
@@ -184,7 +219,7 @@ def shop_screen(screen, player):
                         item = shop_items[idx]
                         if player.gold >= item.price:
                             player.gold -= item.price
-                            player.inventory.append(Item(item.name, item.type, slot=item.slot, power=item.power, defense=item.defense, damage_type=item.damage_type, price=item.price))
+                            player.inventory.append(Item(item.name, item.type_, slot=item.slot, power=item.power, defense=item.defense, damage_type=item.damage_type, price=item.price))
 
 def spawn_boss(game_map):
     boss_x, boss_y = MAP_WIDTH - 5, MAP_HEIGHT - 5
@@ -194,10 +229,15 @@ def spawn_boss(game_map):
 game_mode = start_menu()
 if game_mode == "new":
     player, game_map, enemies, npcs, chests, current_level = reset_game()
-elif game_mode == "load":
-    player, game_map, enemies, npcs, chests, current_level = load_game()
+elif game_mode == "load" and os.path.exists(SAVE_FILE):
+    try:
+        player, game_map, enemies, npcs, chests, current_level = load_game()
+    except (json.JSONDecodeError, KeyError, TypeError) as e:
+        print(f"Arquivo de save corrompido ou inválido ({e}). Iniciando novo jogo.")
+        if os.path.exists(SAVE_FILE): os.remove(SAVE_FILE)
+        player, game_map, enemies, npcs, chests, current_level = reset_game()
 else:
-    pygame.quit(); sys.exit()
+    player, game_map, enemies, npcs, chests, current_level = reset_game()
 
 battle = None
 player_dead = False
@@ -265,11 +305,25 @@ while running:
 
     game_map.draw(screen, camera_x, camera_y)
     player.draw(screen, camera_x, camera_y)
-    if current_level == 1:
-        for npc in npcs: npc.draw(screen, camera_x, camera_y)
 
-    for enemy in enemies[:]:
-        if not battle: enemy.update(player, game_map)
+    # OTIMIZAÇÃO: Define a área visível da câmera
+    view_start_col = camera_x // TILE_SIZE
+    view_end_col = view_start_col + (WIDTH // TILE_SIZE) + 1
+    view_start_row = camera_y // TILE_SIZE
+    view_end_row = view_start_row + (HEIGHT // TILE_SIZE) + 1
+
+    if current_level == 1:
+        for npc in npcs:
+            # Otimização: só desenha NPCs que estão na tela
+            if view_start_col <= npc.x <= view_end_col and view_start_row <= npc.y <= view_end_row:
+                npc.draw(screen, camera_x, camera_y)
+
+    # OTIMIZAÇÃO: Itera apenas sobre inimigos visíveis
+    visible_enemies = [e for e in enemies if view_start_col <= e.x <= view_end_col and view_start_row <= e.y <= view_end_row]
+    
+    for enemy in visible_enemies:
+        if not battle:
+            enemy.update(player, game_map)
         enemy.draw(screen, camera_x, camera_y)
         if not battle and pygame.Rect(player.x, player.y, 1, 1).colliderect(pygame.Rect(enemy.x, enemy.y, enemy.size/TILE_SIZE, enemy.size/TILE_SIZE)):
             if game_map.get_tile_type(player.x, player.y) not in [TOWN, SHOP]:
@@ -291,3 +345,7 @@ while running:
         map_message_timer -= 1
 
     pygame.display.flip()
+    clock.tick(FPS)
+
+pygame.quit()
+sys.exit()
