@@ -65,7 +65,7 @@ def load_game():
         p_data["x"], p_data["y"], p_data["level"], p_data["exp"], p_data["gold"], p_data["hp"], p_data["mana"], p_data.get("skill_points", 0)
     
     player.inventory = []
-    for item_data in p_data["inventory"]:
+    for item_data in p_data.get("inventory", []):
         if 'type' in item_data:
             item_data['type_'] = item_data.pop('type')
         player.inventory.append(Item(**item_data))
@@ -74,20 +74,19 @@ def load_game():
     player.spells = [spell for spell in all_spells if spell.name in p_data.get("spells", [])]
 
     def find_and_equip(slot_name):
-        item_data = p_data.get(f"equipped_{slot_name}")
-        if item_data:
-            if 'type' in item_data:
-                item_data['type_'] = item_data.pop('type')
+        saved_item_data = p_data.get(f"equipped_{slot_name}")
+        if saved_item_data:
+            if 'type' in saved_item_data:
+                saved_item_data['type_'] = saved_item_data.pop('type')
             
-            # Precisamos comparar os dicionários normalizados
-            for item in player.inventory:
-                temp_item_dict = vars(item).copy()
-                if 'type_' in temp_item_dict:
-                    temp_item_dict['type'] = temp_item_dict.pop('type_')
+            for item_in_inv in player.inventory:
+                inv_item_dict = vars(item_in_inv).copy()
+                if 'type_' in inv_item_dict:
+                    inv_item_dict['type'] = inv_item_dict.pop('type_')
                 
-                if temp_item_dict == item_data:
-                    player.equip(item)
-                    break
+                if inv_item_dict == saved_item_data:
+                    player.equip(item_in_inv)
+                    return
 
     find_and_equip("weapon")
     find_and_equip("chest")
@@ -95,7 +94,7 @@ def load_game():
     find_and_equip("gloves")
     find_and_equip("boots")
 
-    if p_data["quest"]: player.quest = Quest(**p_data["quest"])
+    if p_data.get("quest"): player.quest = Quest(**p_data["quest"])
 
     chests = []
     for c_data in save_data.get("chests", []):
@@ -113,13 +112,13 @@ def load_game():
     game_map = GameMap(current_level, chests)
 
     enemies = []
-    for e_data in save_data["enemies"]:
-        if e_data["is_boss"]: enemies.append(Boss(e_data["x"], e_data["y"]))
+    for e_data in save_data.get("enemies", []):
+        if e_data.get("is_boss"): enemies.append(Boss(e_data["x"], e_data["y"]))
         else: enemies.append(Enemy(e_data["x"], e_data["y"], e_data["level"]))
     
     npcs = []
-    for n_data in save_data["npcs"]:
-        quest = Quest(**n_data["quest"]) if n_data["quest"] else None
+    for n_data in save_data.get("npcs", []):
+        quest = Quest(**n_data["quest"]) if n_data.get("quest") else None
         npcs.append(NPC(n_data["x"], n_data["y"], n_data["name"], quest))
 
     return player, game_map, enemies, npcs, chests, current_level
@@ -219,7 +218,8 @@ def shop_screen(screen, player):
                         item = shop_items[idx]
                         if player.gold >= item.price:
                             player.gold -= item.price
-                            player.inventory.append(Item(item.name, item.type_, slot=item.slot, power=item.power, defense=item.defense, damage_type=item.damage_type, price=item.price))
+                            # CORREÇÃO: Usa item.type para ler e passa para o parâmetro type_ do construtor.
+                            player.inventory.append(Item(name=item.name, type_=item.type, slot=item.slot, power=item.power, defense=item.defense, damage_type=item.damage_type, price=item.price))
 
 def spawn_boss(game_map):
     boss_x, boss_y = MAP_WIDTH - 5, MAP_HEIGHT - 5
@@ -306,7 +306,6 @@ while running:
     game_map.draw(screen, camera_x, camera_y)
     player.draw(screen, camera_x, camera_y)
 
-    # OTIMIZAÇÃO: Define a área visível da câmera
     view_start_col = camera_x // TILE_SIZE
     view_end_col = view_start_col + (WIDTH // TILE_SIZE) + 1
     view_start_row = camera_y // TILE_SIZE
@@ -314,11 +313,9 @@ while running:
 
     if current_level == 1:
         for npc in npcs:
-            # Otimização: só desenha NPCs que estão na tela
             if view_start_col <= npc.x <= view_end_col and view_start_row <= npc.y <= view_end_row:
                 npc.draw(screen, camera_x, camera_y)
 
-    # OTIMIZAÇÃO: Itera apenas sobre inimigos visíveis
     visible_enemies = [e for e in enemies if view_start_col <= e.x <= view_end_col and view_start_row <= e.y <= view_end_row]
     
     for enemy in visible_enemies:
