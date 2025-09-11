@@ -1,0 +1,425 @@
+{
+    "player": {
+        "class": "Guerreiro",
+        "x": 3,
+        "y": 23,
+        "level": 4,
+        "exp": 50,
+        "gold": 286,
+        "hp": 181,
+        "mana": 60,
+        "skill_points": 2,
+        "inventory": [
+            {
+                "name": "Espada de Ferro",
+                "type": "weapon",
+                "slot": "weapon",
+                "power": 8,
+                "defense": 0,
+                "damage_type": "physical",
+                "price": 20
+            },
+            {
+                "name": "Po\u00e7\u00e3o",
+                "type": "consumable",
+                "slot": null,
+                "power": 0,
+                "defense": 0,
+                "damage_type": null,
+                "price": 10
+            },
+            {
+                "name": "Po\u00e7\u00e3o",
+                "type": "consumable",
+                "slot": null,
+                "power": 0,
+                "defense": 0,
+                "damage_type": null,
+                "price": 10
+            },
+            {
+                "name": "Po\u00e7\u00e3o de Mana",
+                "type": "consumable",
+                "slot": null,
+                "power": 0,
+                "defense": 0,
+                "damage_type": null,
+                "price": 15
+            },
+            {
+                "name": "Po\u00e7\u00e3o",
+                "type": "consumable",
+                "slot": null,
+                "power": 0,
+                "defense": 0,
+                "damage_type": null,
+                "price": 10
+            },
+            {
+                "name": "Po\u00e7\u00e3o",
+                "type": "consumable",
+                "slot": null,
+                "power": 0,
+                "defense": 0,
+                "damage_type": null,
+                "price": 10
+            },
+            {
+                "name": "Po\u00e7\u00e3o de Mana",
+                "type": "consumable",
+                "slot": null,
+                "power": 0,
+                "defense": 0,
+                "damage_type": null,
+                "price": 15
+            },
+            {
+                "name": "Pele de Lobo",
+                "type": "material",
+                "slot": null,
+                "power": 0,
+                "defense": 0,
+                "damage_type": null,
+                "price": 0
+            },
+            {
+                "name": "Min\u00e9rio de Ferro",
+                "type": "material",
+                "slot": null,
+                "power": 0,
+                "defense": 0,
+                "damage_type": null,
+                "price": 0
+            },
+            {
+                "name": "Po\u00e7\u00e3o",
+                "type": "consumable",
+                "slot": null,
+                "power": 0,
+                "defense": 0,
+                "damage_type": null,
+                "price": 10
+            },
+            {
+                "name": "Po\u00e7\u00e3o de Mana",
+                "type": "consumable",
+                "slot": null,
+                "power": 0,
+                "defense": 0,
+                "damage_type": null,
+                "price": 15
+            },
+            {
+                "name": "Pele de Lobo",
+                "type": "material",
+                "slot": null,
+                "power": 0,
+                "defense": 0,
+                "damage_type": null,
+                "price": 0
+            },
+            {
+                "name": "Pele de Lobo",
+                "type": "material",
+                "slot": null,
+                "power": 0,
+                "defense": 0,
+                "damage_type": null,
+                "price": 0
+            },
+            {
+                "name": "Po\u00e7\u00e3o",
+                "type": "consumable",
+                "slot": null,
+                "power": 0,
+                "defense": 0,
+                "damage_type": null,
+                "price": 10
+            }
+        ],
+        "spells": [
+            "Ataque Poderoso"
+        ],
+        "equipped_weapon": {
+            "name": "Espada de Ferro",
+            "type": "weapon",
+            "slot": "weapon",
+            "power": 8,
+            "defense": 0,
+            "damage_type": "physical",
+            "price": 20
+        },
+        "equipped_chest": {
+            "name": "Armadura de Couro",
+            "type": "armor",
+            "slot": "chest",
+            "power": 0,
+            "defense": 5,
+            "damage_type": null,
+            "price": 50
+        },
+        "equipped_helmet": null,
+        "equipped_gloves": null,
+        "equipped_boots": null,
+        "quest": {
+            "title": "Ca\u00e7ador de Ratos",
+            "description": "Cace 5 inimigos.",
+            "goal_type": "kill",
+            "goal_target": "Enemy",
+            "goal_amount": 5,
+            "reward_exp": 100,
+            "reward_gold": 50,
+            "current_amount": 5,
+            "completed": true
+        }
+    },
+    "enemies": [
+        {
+            "x": 19,
+            "y": 18,
+            "level": 4,
+            "is_boss": false
+        },
+        {
+            "x": 18,
+            "y": 45,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 6,
+            "y": 41,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 14,
+            "y": 22,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 11,
+            "y": 43,
+            "level": 2,
+            "is_boss": false
+        },
+        {
+            "x": 28,
+            "y": 48,
+            "level": 4,
+            "is_boss": false
+        },
+        {
+            "x": 47,
+            "y": 2,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 9,
+            "y": 35,
+            "level": 2,
+            "is_boss": false
+        },
+        {
+            "x": 27,
+            "y": 30,
+            "level": 2,
+            "is_boss": false
+        },
+        {
+            "x": 19,
+            "y": 44,
+            "level": 2,
+            "is_boss": false
+        },
+        {
+            "x": 11,
+            "y": 25,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 36,
+            "y": 38,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 38,
+            "y": 33,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 11,
+            "y": 33,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 14,
+            "y": 34,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 30,
+            "y": 16,
+            "level": 4,
+            "is_boss": false
+        },
+        {
+            "x": 18,
+            "y": 11,
+            "level": 3,
+            "is_boss": false
+        },
+        {
+            "x": 34,
+            "y": 33,
+            "level": 2,
+            "is_boss": false
+        },
+        {
+            "x": 30,
+            "y": 13,
+            "level": 2,
+            "is_boss": false
+        },
+        {
+            "x": 33,
+            "y": 8,
+            "level": 3,
+            "is_boss": false
+        }
+    ],
+    "npcs": [
+        {
+            "x": 12,
+            "y": 8,
+            "name": "Aldric",
+            "quest": {
+                "title": "Ca\u00e7ador de Ratos",
+                "description": "Cace 5 inimigos.",
+                "goal_type": "kill",
+                "goal_target": "Enemy",
+                "goal_amount": 5,
+                "reward_exp": 100,
+                "reward_gold": 50,
+                "current_amount": 5,
+                "completed": true
+            }
+        }
+    ],
+    "chests": [
+        {
+            "x": 3,
+            "y": 10,
+            "gold": 49,
+            "is_opened": true,
+            "items": []
+        },
+        {
+            "x": 23,
+            "y": 14,
+            "gold": 12,
+            "is_opened": false,
+            "items": [
+                {
+                    "name": "Po\u00e7\u00e3o",
+                    "type": "consumable",
+                    "slot": null,
+                    "power": 0,
+                    "defense": 0,
+                    "damage_type": null,
+                    "price": 10
+                }
+            ]
+        },
+        {
+            "x": 3,
+            "y": 23,
+            "gold": 27,
+            "is_opened": true,
+            "items": [
+                {
+                    "name": "Po\u00e7\u00e3o",
+                    "type": "consumable",
+                    "slot": null,
+                    "power": 0,
+                    "defense": 0,
+                    "damage_type": null,
+                    "price": 10
+                }
+            ]
+        },
+        {
+            "x": 9,
+            "y": 26,
+            "gold": 17,
+            "is_opened": false,
+            "items": [
+                {
+                    "name": "Po\u00e7\u00e3o",
+                    "type": "consumable",
+                    "slot": null,
+                    "power": 0,
+                    "defense": 0,
+                    "damage_type": null,
+                    "price": 10
+                }
+            ]
+        },
+        {
+            "x": 15,
+            "y": 28,
+            "gold": 47,
+            "is_opened": false,
+            "items": []
+        },
+        {
+            "x": 42,
+            "y": 33,
+            "gold": 21,
+            "is_opened": false,
+            "items": [
+                {
+                    "name": "Po\u00e7\u00e3o",
+                    "type": "consumable",
+                    "slot": null,
+                    "power": 0,
+                    "defense": 0,
+                    "damage_type": null,
+                    "price": 10
+                }
+            ]
+        },
+        {
+            "x": 5,
+            "y": 41,
+            "gold": 33,
+            "is_opened": false,
+            "items": [
+                {
+                    "name": "Po\u00e7\u00e3o",
+                    "type": "consumable",
+                    "slot": null,
+                    "power": 0,
+                    "defense": 0,
+                    "damage_type": null,
+                    "price": 10
+                }
+            ]
+        },
+        {
+            "x": 6,
+            "y": 43,
+            "gold": 20,
+            "is_opened": false,
+            "items": []
+        }
+    ],
+    "current_level": 2
+}

@@ -29,19 +29,8 @@ def save_game(player, enemies, npcs, chests, current_level):
             item_dict['type'] = item_dict.pop('type_')
         return item_dict
 
-    player_data = {
-        "class": player.character_class, "x": player.x, "y": player.y, "level": player.level,
-        "exp": player.exp, "gold": player.gold, "hp": player.hp, "mana": player.mana,
-        "skill_points": player.skill_points,
-        "inventory": [item_to_dict(item) for item in player.inventory],
-        "spells": [s.name for s in player.spells],
-        "equipped_weapon": item_to_dict(player.equipped_weapon) if player.equipped_weapon else None,
-        "equipped_chest": item_to_dict(player.equipped_chest) if player.equipped_chest else None,
-        "equipped_helmet": item_to_dict(player.equipped_helmet) if player.equipped_helmet else None,
-        "equipped_gloves": item_to_dict(player.equipped_gloves) if player.equipped_gloves else None,
-        "equipped_boots": item_to_dict(player.equipped_boots) if player.equipped_boots else None,
-        "quest": vars(player.quest) if player.quest else None
-    }
+    player_data = player.to_dict()
+
     enemies_data = [{"x": e.x, "y": e.y, "level": e.level, "is_boss": isinstance(e, Boss)} for e in enemies]
     npcs_data = [{"x": n.x, "y": n.y, "name": n.name, "quest": vars(n.quest) if n.quest else None} for n in npcs]
     chests_data = [
@@ -59,42 +48,9 @@ def load_game():
     with open(SAVE_FILE, 'r') as f:
         save_data = json.load(f)
     
-    p_data = save_data["player"]
-    player = Player(p_data["class"])
-    player.x, player.y, player.level, player.exp, player.gold, player.hp, player.mana, player.skill_points = \
-        p_data["x"], p_data["y"], p_data["level"], p_data["exp"], p_data["gold"], p_data["hp"], p_data["mana"], p_data.get("skill_points", 0)
-    
-    player.inventory = []
-    for item_data in p_data.get("inventory", []):
-        if 'type' in item_data:
-            item_data['type_'] = item_data.pop('type')
-        player.inventory.append(Item(**item_data))
-    
     all_spells = SKILL_LIST["Guerreiro"] + SKILL_LIST["Mago"] + SKILL_LIST["Arqueiro"]
-    player.spells = [spell for spell in all_spells if spell.name in p_data.get("spells", [])]
 
-    def find_and_equip(slot_name):
-        saved_item_data = p_data.get(f"equipped_{slot_name}")
-        if saved_item_data:
-            if 'type' in saved_item_data:
-                saved_item_data['type_'] = saved_item_data.pop('type')
-            
-            for item_in_inv in player.inventory:
-                inv_item_dict = vars(item_in_inv).copy()
-                if 'type_' in inv_item_dict:
-                    inv_item_dict['type'] = inv_item_dict.pop('type_')
-                
-                if inv_item_dict == saved_item_data:
-                    player.equip(item_in_inv)
-                    return
-
-    find_and_equip("weapon")
-    find_and_equip("chest")
-    find_and_equip("helmet")
-    find_and_equip("gloves")
-    find_and_equip("boots")
-
-    if p_data.get("quest"): player.quest = Quest(**p_data["quest"])
+    player = Player.from_dict(save_data["player"], all_spells)
 
     chests = []
     for c_data in save_data.get("chests", []):
@@ -218,12 +174,47 @@ def shop_screen(screen, player):
                         item = shop_items[idx]
                         if player.gold >= item.price:
                             player.gold -= item.price
-                            # CORREÇÃO: Usa item.type para ler e passa para o parâmetro type_ do construtor.
                             player.inventory.append(Item(name=item.name, type_=item.type, slot=item.slot, power=item.power, defense=item.defense, damage_type=item.damage_type, price=item.price))
 
 def spawn_boss(game_map):
     boss_x, boss_y = MAP_WIDTH - 5, MAP_HEIGHT - 5
     return Boss(boss_x, boss_y)
+
+# --- MELHORIA: Função para desenhar o HUD ---
+def draw_hud(screen, player):
+    # Fundo semi-transparente para o HUD
+    hud_surface = pygame.Surface((WIDTH, 80), pygame.SRCALPHA)
+    hud_surface.fill((0, 0, 0, 150))
+    screen.blit(hud_surface, (0, HEIGHT - 80))
+
+    font = pygame.font.SysFont("Arial", 18)
+    
+    # Vida
+    hp_text = font.render(f"HP: {player.hp} / {player.max_hp}", True, WHITE)
+    screen.blit(hp_text, (20, HEIGHT - 65))
+    # Barra de Vida
+    pygame.draw.rect(screen, (100,0,0), (120, HEIGHT - 65, 200, 15))
+    hp_fill = 0
+    if player.max_hp > 0:
+        hp_fill = (player.hp / player.max_hp) * 200
+    pygame.draw.rect(screen, (255,0,0), (120, HEIGHT - 65, hp_fill, 15))
+
+    # Mana
+    mp_text = font.render(f"MP: {player.mana} / {player.max_mana}", True, WHITE)
+    screen.blit(mp_text, (20, HEIGHT - 40))
+    # Barra de Mana
+    pygame.draw.rect(screen, (0,0,100), (120, HEIGHT - 40, 150, 15))
+    mp_fill = 0
+    if player.max_mana > 0:
+        mp_fill = (player.mana / player.max_mana) * 150
+    pygame.draw.rect(screen, (0,100,255), (120, HEIGHT - 40, mp_fill, 15))
+
+    # Ouro e Nível
+    gold_text = font.render(f"Ouro: {player.gold}", True, (255, 223, 0))
+    level_text = font.render(f"Nível: {player.level} ({player.exp}/100)", True, WHITE)
+    screen.blit(gold_text, (WIDTH - 150, HEIGHT - 65))
+    screen.blit(level_text, (WIDTH - 150, HEIGHT - 40))
+# -------------------------------------------
 
 # --- Início do Jogo ---
 game_mode = start_menu()
@@ -244,6 +235,10 @@ player_dead = False
 running = True
 map_message = ""
 map_message_timer = 0
+# --- NOVAS VARIÁVEIS PARA VANTAGEM DO ARQUEIRO ---
+projectile_path = []
+projectile_timer = 0
+# ------------------------------------------------
 
 while running:
     screen.fill(BLACK)
@@ -257,6 +252,39 @@ while running:
             if event.key == pygame.K_i: InventoryScreen(screen, player).run()
             if event.key == pygame.K_k: SkillTreeScreen(screen, player).run()
             if event.key == pygame.K_c: CraftingScreen(screen, player).run()
+            
+            # --- LÓGICA DA VANTAGEM DO ARQUEIRO ---
+            if event.key == pygame.K_a:
+                if player.character_class == "Arqueiro" and player.ranged_shot_cooldown == 0:
+                    player.ranged_shot_cooldown = 60  # Cooldown de 60 frames (aprox. 1 segundo)
+                    projectile_path.clear()
+                    projectile_timer = 20  # Duração visual do rastro da flecha
+                    
+                    dx, dy = player.last_direction
+                    shot_hit = False
+                    for i in range(1, 8):  # Alcance de 7 tiles
+                        check_x, check_y = player.x + dx * i, player.y + dy * i
+                        
+                        if not game_map.is_walkable(check_x, check_y):
+                            projectile_path.append((check_x, check_y))
+                            break  # Flecha atinge a parede
+
+                        projectile_path.append((check_x, check_y))
+
+                        for enemy in enemies:
+                            if enemy.x == check_x and enemy.y == check_y:
+                                damage_dealt = 20  # Dano base do tiro à distância
+                                enemy.hp -= damage_dealt
+                                map_message = f"Tiro certeiro! Você causou {damage_dealt} de dano!"
+                                map_message_timer = 100
+                                
+                                battle = Battle(screen, player, enemy, battle_background)
+                                shot_hit = True
+                                break
+                        if shot_hit:
+                            break
+            # -----------------------------------------
+
             if event.key == pygame.K_e:
                 if game_map.get_tile_type(player.x, player.y) == SHOP: shop_screen(screen, player)
                 for npc in npcs:
@@ -306,6 +334,19 @@ while running:
     game_map.draw(screen, camera_x, camera_y)
     player.draw(screen, camera_x, camera_y)
 
+    # --- DESENHO DO PROJÉTIL DO ARQUEIRO ---
+    if projectile_timer > 0:
+        for pos in projectile_path:
+            px, py = pos
+            rect = pygame.Rect(px * TILE_SIZE - camera_x + TILE_SIZE // 4, 
+                               py * TILE_SIZE - camera_y + TILE_SIZE // 4, 
+                               TILE_SIZE // 2, TILE_SIZE // 2)
+            pygame.draw.rect(screen, (200, 200, 0), rect) # Cor amarela para o rastro
+        projectile_timer -= 1
+        if projectile_timer == 0:
+            projectile_path.clear()
+    # -----------------------------------------
+
     view_start_col = camera_x // TILE_SIZE
     view_end_col = view_start_col + (WIDTH // TILE_SIZE) + 1
     view_start_row = camera_y // TILE_SIZE
@@ -340,6 +381,11 @@ while running:
         pygame.draw.rect(screen, BLACK, (10, 10, text.get_width() + 20, 40))
         screen.blit(text, (20, 20))
         map_message_timer -= 1
+
+    # --- MELHORIA: Desenha o HUD por cima de tudo ---
+    if not battle and not player_dead:
+        draw_hud(screen, player)
+    # -----------------------------------------------
 
     pygame.display.flip()
     clock.tick(FPS)

@@ -21,6 +21,11 @@ class Player:
         self.terrain_damage_timer = 0
         self.skill_points = 0
 
+        # --- NOVOS ATRIBUTOS PARA VANTAGEM DO ARQUEIRO ---
+        self.last_direction = (0, 1) # (dx, dy), começa olhando para baixo
+        self.ranged_shot_cooldown = 0
+        # ------------------------------------------------
+
         if self.character_class == "Guerreiro":
             self.max_hp = 150
             self.max_mana = 30
@@ -131,6 +136,10 @@ class Player:
         new_x = self.x + dx
         new_y = self.y + dy
         if game_map.is_walkable(new_x, new_y):
+            # --- MODIFICAÇÃO: Armazena a última direção de movimento ---
+            if dx != 0 or dy != 0:
+                self.last_direction = (dx, dy)
+            # ---------------------------------------------------------
             self.x = new_x
             self.y = new_y
             tile_type = game_map.get_tile_type(self.x, self.y)
@@ -142,6 +151,11 @@ class Player:
     def update(self, keys, game_map):
         if self.movement_cooldown > 0:
             self.movement_cooldown -= 1
+        
+        # --- MODIFICAÇÃO: Atualiza o cooldown do tiro à distância ---
+        if self.ranged_shot_cooldown > 0:
+            self.ranged_shot_cooldown -= 1
+        # ---------------------------------------------------------
 
         if keys[pygame.K_UP]: self.move(0, -1, game_map)
         elif keys[pygame.K_DOWN]: self.move(0, 1, game_map)
@@ -156,3 +170,56 @@ class Player:
 
     def draw(self, screen, camera_x, camera_y):
         pygame.draw.rect(screen, self.color, (self.x * TILE_SIZE - camera_x, self.y * TILE_SIZE - camera_y, TILE_SIZE, TILE_SIZE))
+
+    def to_dict(self):
+        def item_to_dict(item):
+            if not item: return None
+            item_dict = vars(item).copy()
+            if 'type_' in item_dict:
+                item_dict['type'] = item_dict.pop('type_')
+            return item_dict
+        
+        return {
+            "class": self.character_class, "x": self.x, "y": self.y, "level": self.level,
+            "exp": self.exp, "gold": self.gold, "hp": self.hp, "mana": self.mana,
+            "skill_points": self.skill_points,
+            "inventory": [item_to_dict(item) for item in self.inventory],
+            "spells": [s.name for s in self.spells],
+            "equipped_weapon": item_to_dict(self.equipped_weapon),
+            "equipped_chest": item_to_dict(self.equipped_chest),
+            "equipped_helmet": item_to_dict(self.equipped_helmet),
+            "equipped_gloves": item_to_dict(self.equipped_gloves),
+            "equipped_boots": item_to_dict(self.equipped_boots),
+            "quest": vars(self.quest) if self.quest else None
+        }
+    
+    @staticmethod
+    def from_dict(data, all_spells_list):
+        """Cria uma instância de Player a partir de um dicionário."""
+        # Importação local para evitar dependência circular
+        from npc import Quest
+        
+        player = Player(data["class"])
+        player.x, player.y, player.level, player.exp, player.gold, player.hp, player.mana, player.skill_points = \
+            data["x"], data["y"], data["level"], data["exp"], data["gold"], data["hp"], data["mana"], data.get("skill_points", 0)
+
+        player.inventory = []
+        for item_data in data.get("inventory", []):
+            if 'type' in item_data: item_data['type_'] = item_data.pop('type')
+            player.inventory.append(Item(**item_data))
+        
+        # Recria as magias
+        player.spells = [spell for spell in all_spells_list if spell.name in data.get("spells", [])]
+
+        for slot in ["weapon", "chest", "helmet", "gloves", "boots"]:
+            equipped_item_data = data.get(f"equipped_{slot}")
+            if equipped_item_data:
+                # Procura o item exato no inventário para equipar
+                for item_in_inv in player.inventory:
+                    if item_in_inv.name == equipped_item_data.get('name') and item_in_inv.slot == equipped_item_data.get('slot'):
+                        player.equip(item_in_inv)
+                        break
+
+        if data.get("quest"):
+            player.quest = Quest(**data["quest"])
+        return player
